@@ -1,58 +1,58 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import SearchBar from './SearchBar';
-import youtube from '../apis/youtube';
 import VideoList from './VideoList'
 import VideoDetail from './VideoDetail'
+import useVideos from '../hooks/useVideos'
 
-class App extends React.Component{
-    state = { 
-        videos: [],
-        selectedVideo: null 
-    }
+const App = () => {
 
-    componentDidMount(){
-        //default search term on intial load
-        this.onTermSubmit('buildings')
-    }
+    //data fetching is usually a great thing to try to make reusable
+    //const [videos, setVideos] = useState([])
+    const [selectedVideo, setSelectedVideo] = useState(null);
+    const [videos, search] = useVideos('buildings');
 
+    useEffect(()=>{
+        setSelectedVideo(videos[0]);
+    },[videos])
+    
+    // useEffect(()=>{
+    //     onTermSubmit('buildings')
+    // },[])
+    
+    // const onTermSubmit = async (term) => {
+    //     // axios.create is exported as youtube
+    //     const response = await youtube.get('/search',{
+    //         params: {
+    //             q: {term}
+    //         }
+    //     })
+    //     setVideos(response.data.items);
+    //     setSelectedVideo(response.data.items[0])
+    // }
 
-    onVideoSelect = (video) => {
-        this.setState({selectedVideo: video})
-    }
+    //note to make jsx reusable, we usually create another component
+    //usually this portion does not always have to do with making state and effects reusable
 
-    onTermSubmit = async (term) => {
-        // axios.create is exported as youtube
-        const response = await youtube.get('/search',{
-            params: {
-                q: {term}
-            }
-        })
-        this.setState({
-            videos: response.data.items,
-            selectedVideo: response.data.items[0]
-        })
-    }
-
-    render() {
-        return (
-            <div className="ui container">
-                <SearchBar onFormSubmit={this.onTermSubmit}/>
-                <div className="ui grid">
-                    <div className="ui row">
-                        <div className="eleven wide column">
-                            <VideoDetail video={this.state.selectedVideo} />
-                        </div>
-                        <div className="five wide column">
-                            <VideoList 
-                                videos = {this.state.videos}
-                                onVideoSelect={this.onVideoSelect} 
-                            />
-                        </div>
+    return (
+        <div className="ui container">
+            <SearchBar onFormSubmit={search}/>
+            <div className="ui grid">
+                <div className="ui row">
+                    <div className="eleven wide column">
+                        <VideoDetail video={selectedVideo} />
+                    </div>
+                    <div className="five wide column">
+                        <VideoList 
+                            videos = {videos}
+                            //onVideoSelect={video=>setSelectedVideo(video)}
+                            //below equivalent to above
+                            onVideoSelect={setSelectedVideo}
+                        />
                     </div>
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 export default App
